@@ -36,6 +36,18 @@ if [ -f "$ICON_SRC" ]; then
     iconutil -c icns "$ICONSET_DIR" -o "$RESOURCES/AppIcon.icns"
     rm -rf "$(dirname "$ICONSET_DIR")"
     echo "Icon created."
+
+    # Also compile asset catalog for CFBundleIconName support
+    if command -v actool >/dev/null 2>&1; then
+        echo "Compiling asset catalog..."
+        actool Resources/Assets.xcassets \
+            --compile "$RESOURCES" \
+            --platform macosx \
+            --minimum-deployment-target 15.0 \
+            --app-icon AppIcon \
+            --output-partial-info-plist /tmp/actool-partial.plist \
+            >/dev/null 2>&1 || true
+    fi
 else
     echo "Warning: No icon source found at $ICON_SRC"
 fi
@@ -52,14 +64,16 @@ cat > "$CONTENTS/Info.plist" << 'PLIST'
     <key>CFBundleIdentifier</key>
     <string>com.victor.timetracker</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>2</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
+    <string>1.1.0</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleExecutable</key>
     <string>TimeTracker</string>
     <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundleIconName</key>
     <string>AppIcon</string>
     <key>LSMinimumSystemVersion</key>
     <string>15.0</string>
@@ -70,6 +84,12 @@ cat > "$CONTENTS/Info.plist" << 'PLIST'
 </dict>
 </plist>
 PLIST
+
+# Flush icon cache so macOS picks up the new icon
+echo "Flushing icon cache..."
+sudo rm -rf /Library/Caches/com.apple.iconservices.store 2>/dev/null || true
+killall Finder 2>/dev/null || true
+killall Dock 2>/dev/null || true
 
 echo "Done! App bundle at: $SCRIPT_DIR/$APP_DIR"
 echo ""
