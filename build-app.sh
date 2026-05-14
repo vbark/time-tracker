@@ -4,7 +4,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
-APP_DIR="build/TimeTracker.app"
+APP_DIR="build/Time Tracker.app"
 CONTENTS="$APP_DIR/Contents"
 MACOS="$CONTENTS/MacOS"
 RESOURCES="$CONTENTS/Resources"
@@ -94,7 +94,7 @@ killall Dock 2>/dev/null || true
 echo "Done! App bundle at: $SCRIPT_DIR/$APP_DIR"
 echo ""
 echo "To install to Applications:"
-echo "  cp -R $SCRIPT_DIR/$APP_DIR /Applications/"
+echo "  cp -R \"$SCRIPT_DIR/$APP_DIR\" /Applications/"
 echo ""
 echo "To launch now:"
-echo "  open $SCRIPT_DIR/$APP_DIR"
+echo "  open \"$SCRIPT_DIR/$APP_DIR\""
