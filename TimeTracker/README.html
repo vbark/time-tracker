@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Tracker — Documentation</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --text: #1a1a2e;
+    --text-secondary: #555;
+    --accent: #7c3aed;
+    --accent-light: #ede9fe;
+    --green: #16a34a;
+    --red: #dc2626;
+    --orange: #d97706;
+    --blue: #2563eb;
+    --border: #e5e7eb;
+    --code-bg: #f3f4f6;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f0f14;
+      --surface: #1a1a24;
+      --text: #e4e4ed;
+      --text-secondary: #9a9ab0;
+      --accent: #a78bfa;
+      --accent-light: #1e1b34;
+      --green: #4ade80;
+      --red: #f87171;
+      --orange: #fbbf24;
+      --blue: #60a5fa;
+      --border: #2a2a3a;
+      --code-bg: #16161e;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0 24px 80px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 64px 0 40px;
+  }
+  .hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--accent), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    margin-top: 12px;
+    max-width: 560px;
+    margin-inline: auto;
+  }
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  /* Sections */
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 48px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 28px 0 10px;
+    color: var(--accent);
+  }
+  p, li { color: var(--text); }
+  p { margin-bottom: 12px; }
+
+  /* Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .card .icon { font-size: 1.6rem; margin-bottom: 8px; }
+  .card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+  .card p { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-weight: 600;
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  td code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+  }
+
+  /* Code blocks */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  code {
+    font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 0.85em;
+  }
+  p code, li code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* Lists */
+  ul, ol { margin: 8px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  /* Info boxes */
+  .info-box {
+    background: var(--accent-light);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+  .info-box strong { color: var(--accent); }
+
+  /* Architecture diagram (text-based) */
+  .arch {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px 0;
+    font-family: "SF Mono", monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--text-secondary);
+  }
+
+  /* Color dots */
+  .dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .dot-green  { background: var(--green); }
+  .dot-red    { background: var(--red); }
+  .dot-orange { background: var(--orange); }
+  .dot-purple { background: var(--accent); }
+
+  /* Footer */
+  footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>Time Tracker</h1>
+  <p>A native macOS app for tracking work hours, calculating overtime balance, and keeping your time data synced via iCloud Drive.</p>
+  <div class="badge-row">
+    <span class="badge">SwiftUI</span>
+    <span class="badge">macOS 14+</span>
+    <span class="badge">Swift 6</span>
+    <span class="badge">Menu Bar App</span>
+    <span class="badge">iCloud Sync</span>
+  </div>
+</div>
+
+<!-- Features -->
+<h2>Features</h2>
+<div class="card-grid">
+  <div class="card">
+    <div class="icon">⏱</div>
+    <h4>Timer</h4>
+    <p>Start/stop with live elapsed display. Survives app restarts — the original start time is preserved in UserDefaults.</p>
+  </div>
+  <div class="card">
+    <div class="icon">✏️</div>
+    <h4>Manual Entry</h4>
+    <p>Add time entries with start/end times, optional note, and off-day toggle. Entries land on the selected calendar date.</p>
+  </div>
+  <div class="card">
+    <div class="icon">📋</div>
+    <h4>Entry Management</h4>
+    <p>Double-click to edit, right-click to delete. Full table view with time range, duration, note, and type columns.</p>
+  </div>
+  <div class="card">
+    <div class="icon">📅</div>
+    <h4>Calendar</h4>
+    <p>Month view with navigation. Days are color-coded: <span class="dot dot-green"></span>work, <span class="dot dot-red"></span>off, <span class="dot dot-orange"></span>today, <span class="dot dot-purple"></span>selected.</p>
+  </div>
+  <div class="card">
+    <div class="icon">📊</div>
+    <h4>Statistics</h4>
+    <p>Selected day, week, month, and overall stats. Hours worked, expected, balance, and days — with a hero balance display.</p>
+  </div>
+  <div class="card">
+    <div class="icon">🖥</div>
+    <h4>Menu Bar</h4>
+    <p>Always-visible menu bar icon with popover: timer status, today's progress bar, quick start/stop, and overall balance.</p>
+  </div>
+  <div class="card">
+    <div class="icon">☁️</div>
+    <h4>iCloud Drive</h4>
+    <p>CSV stored in iCloud Drive for automatic sync. Local backup kept as fallback. Configurable in Settings.</p>
+  </div>
+  <div class="card">
+    <div class="icon">🌗</div>
+    <h4>Dark &amp; Light Mode</h4>
+    <p>Follows macOS system appearance natively. Custom accent colors adapt to both modes automatically.</p>
+  </div>
+</div>
+
+<!-- Keyboard Shortcuts -->
+<h2>Keyboard Shortcuts</h2>
+<table>
+  <thead>
+    <tr><th>Shortcut</th><th>Action</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>⌘T</code></td><td>Toggle timer (start/stop)</td></tr>
+    <tr><td><code>⌘N</code></td><td>Add manual entry from form</td></tr>
+    <tr><td><code>⌘R</code></td><td>Refresh data from file</td></tr>
+    <tr><td><code>⌘,</code></td><td>Open Settings (target hours, storage path)</td></tr>
+    <tr><td><code>Escape</code></td><td>Jump to today's date</td></tr>
+    <tr><td>Double-click entry</td><td>Edit that entry</td></tr>
+    <tr><td>Right-click entry</td><td>Context menu (Edit / Delete)</td></tr>
+  </tbody>
+</table>
+
+<!-- CSV Format -->
+<h2>CSV Format</h2>
+<p>Fully backward-compatible with the original Python time-tracker app. You can drop in an existing <code>time_log.csv</code> and it reads it directly.</p>
+
+<table>
+  <thead>
+    <tr><th>Column</th><th>Format</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>date</code></td><td><code>YYYY-MM-DD</code></td><td>Entry date</td></tr>
+    <tr><td><code>start_time</code></td><td><code>HH:MM</code></td><td>Work start (24h)</td></tr>
+    <tr><td><code>end_time</code></td><td><code>HH:MM</code></td><td>Work end (24h)</td></tr>
+    <tr><td><code>duration</code></td><td><code>HH:MM</code></td><td>Calculated duration (00:00 for off days)</td></tr>
+    <tr><td><code>is_off_day</code></td><td><code>true/false</code></td><td>Off days don't affect balance</td></tr>
+    <tr><td><code>is_overtime_taken</code></td><td><code>true/false</code></td><td>Reserved field for future use</td></tr>
+    <tr><td><code>note</code></td><td>Free text</td><td>Optional note for the entry</td></tr>
+  </tbody>
+</table>
+
+<p>Example:</p>
+<pre><code>date,start_time,end_time,duration,is_off_day,is_overtime_taken,note
+2026-05-14,08:15,12:30,04:15,false,false,Morning session
+2026-05-14,13:00,17:00,04:00,false,false,Afternoon session
+2026-05-15,09:00,17:00,00:00,true,false,Public holiday</code></pre>
+
+<!-- Storage -->
+<h2>Storage</h2>
+
+<h3>File Locations</h3>
+<table>
+  <thead>
+    <tr><th>Location</th><th>Path</th><th>Purpose</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Primary (iCloud)</strong></td>
+      <td><code>~/Library/Mobile Documents/com~apple~CloudDocs/TimeTracker/time_log.csv</code></td>
+      <td>Auto-syncs via iCloud Drive</td>
+    </tr>
+    <tr>
+      <td><strong>Backup (local)</strong></td>
+      <td><code>~/Library/Application Support/TimeTracker/time_log_backup.csv</code></td>
+      <td>Offline fallback &amp; crash recovery</td>
+    </tr>
+    <tr>
+      <td><strong>Timer state</strong></td>
+      <td>UserDefaults</td>
+      <td>Running timer survives app restarts</td>
+    </tr>
+    <tr>
+      <td><strong>Settings</strong></td>
+      <td>UserDefaults</td>
+      <td>Daily target hours, storage path, preferences</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="info-box">
+  <strong>Dual-storage pattern:</strong> Every save writes to both primary and backup. On load, the app picks whichever file was most recently modified. If the primary is unavailable, the backup is used automatically with a warning indicator.
+</div>
+
+<h3>Custom Storage Path</h3>
+<p>Open Settings (<code>⌘,</code>) to point the primary file at any location — a different iCloud folder, a Dropbox directory, or a local path. The backup always stays in Application Support.</p>
+
+<!-- Timer Persistence -->
+<h2>Timer Persistence</h2>
+<p>Unlike the Python version, the timer survives app quits, crashes, and device restarts:</p>
+<ol>
+  <li><strong>On start:</strong> The original start time is saved to UserDefaults immediately.</li>
+  <li><strong>On restart:</strong> The app detects the saved start time and resumes counting from it — no time is lost.</li>
+  <li><strong>On stop:</strong> A time entry is created with the original start and current end time. UserDefaults is cleared.</li>
+</ol>
+
+<!-- Statistics -->
+<h2>Statistics</h2>
+<p>All statistics are pre-computed whenever entries change. The balance logic works identically to the Python app:</p>
+<ul>
+  <li><strong>Daily balance</strong> = hours worked − daily target (default 8h)</li>
+  <li><strong>Off days</strong> are fully excluded — they contribute 0h, not −8h</li>
+  <li><strong>Week</strong> uses ISO weeks (Monday → Sunday)</li>
+  <li><strong>Expected hours</strong> shown as "tracked days × target / weekdays × target"</li>
+</ul>
+
+<h3>Statistics Sections</h3>
+<table>
+  <thead>
+    <tr><th>Section</th><th>Metrics</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Hero Balance</td><td>Overall overtime balance (large, color-coded)</td></tr>
+    <tr><td>Selected Day</td><td>Worked, Balance</td></tr>
+    <tr><td>Selected Week</td><td>Worked, Expected, Balance, Days</td></tr>
+    <tr><td>Selected Month</td><td>Worked, Expected, Balance, Days</td></tr>
+    <tr><td>Overall</td><td>Worked, Expected, Avg Daily, Balance, Days</td></tr>
+  </tbody>
+</table>
+
+<!-- Architecture -->
+<h2>Architecture</h2>
+
+<div class="arch">TimeTrackerApp (@main)
+├── WindowGroup → MainView
+│   ├── Left Column
+│   │   ├── TimerView          (start/stop, elapsed display)
+│   │   ├── QuickActionsBar    (today, refresh, export)
+│   │   ├── ManualEntryView    (time inputs, note, off-day)
+│   │   ├── DaySummaryView     (total, balance, count, status)
+│   │   └── EntriesListView    (Table with edit/delete)
+│   └── Right Column
+│       ├── StatisticsView     (hero + 4 sections)
+│       └── CalendarCardView   (month grid, navigation)
+├── MenuBarExtra (.window) → MenuBarView
+│   ├── Timer status + controls
+│   ├── Today's progress bar
+│   └── Quit button
+└── Settings → StorageSettingsView
+    ├── Daily target hours
+    └── Storage path management</div>
+
+<h3>Key Patterns</h3>
+<ul>
+  <li><strong><code>@Observable</code> ViewModel</strong> — Single source of truth with <code>@MainActor</code> isolation. All derived state (day totals, weekly balance, calendar colors) is pre-computed on mutation, keeping view bodies trivial.</li>
+  <li><strong>CSVService</strong> — Stateless read/write. Handles legacy files missing the "note" column. Respects quoted fields with commas.</li>
+  <li><strong>StorageService</strong> — Coordinates dual-file writes, picks newest on load, reports status/warnings.</li>
+  <li><strong>TimerPersistenceService</strong> — UserDefaults-backed timer state, checked on launch for recovery.</li>
+</ul>
+
+<!-- Build & Run -->
+<h2>Build &amp; Run</h2>
+
+<h3>Quick Start (app bundle)</h3>
+<pre><code>cd TimeTracker
+./build-app.sh
+open build/TimeTracker.app</code></pre>
+
+<h3>Install to Applications</h3>
+<pre><code>cp -R build/TimeTracker.app /Applications/</code></pre>
+
+<h3>Development (live rebuild)</h3>
+<pre><code>swift build
+swift run</code></pre>
+
+<h3>With Xcode (optional)</h3>
+<pre><code>xcodegen generate
+open TimeTracker.xcodeproj</code></pre>
+
+<h3>Requirements</h3>
+<ul>
+  <li>macOS 14.0+</li>
+  <li>Swift 6.0+ (included with Xcode 16+ or Command Line Tools)</li>
+  <li>Xcode 16+ (optional — only needed for <code>.xcodeproj</code>)</li>
+</ul>
+
+<!-- Project Structure -->
+<h2>Project Structure</h2>
+<pre><code>TimeTracker/
+├── Package.swift              # Swift Package Manager config
+├── project.yml                # XcodeGen project spec
+├── build-app.sh               # Builds .app bundle from release binary
+├── README.html                # This file
+├── Sources/
+│   ├── App/
+│   │   └── TimeTrackerApp.swift
+│   ├── Models/
+│   │   ├── TimeEntry.swift       # CSV-compatible data model
+│   │   └── AppSettings.swift     # UserDefaults-backed preferences
+│   ├── ViewModels/
+│   │   └── TimeTrackerViewModel.swift
+│   ├── Views/
+│   │   ├── MainView.swift        # Two-column root layout
+│   │   ├── TimerView.swift
+│   │   ├── ManualEntryView.swift
+│   │   ├── EntriesListView.swift
+│   │   ├── DaySummaryView.swift
+│   │   ├── StatisticsView.swift
+│   │   ├── CalendarCardView.swift
+│   │   ├── MenuBarView.swift
+│   │   ├── StorageSettingsView.swift
+│   │   └── Components/
+│   │       └── StatRow.swift
+│   ├── Services/
+│   │   ├── CSVService.swift
+│   │   ├── StorageService.swift
+│   │   └── TimerPersistenceService.swift
+│   └── Utilities/
+│       ├── DateFormatting.swift
+│       └── Color+Theme.swift
+└── Resources/
+    ├── Assets.xcassets/
+    └── Info.plist</code></pre>
+
+<footer>
+  Time Tracker v1.0.0 — Built with SwiftUI for macOS
+</footer>
+
+</body>
+</html>
