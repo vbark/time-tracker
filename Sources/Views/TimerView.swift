@@ -8,7 +8,7 @@ struct TimerView: View {
             VStack(spacing: 6) {
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(vm.timerIsRunning ? .green : .secondary.opacity(0.4))
+                        .fill(vm.timerIsRunning ? Color.balancePositive : .secondary.opacity(0.4))
                         .frame(width: 8, height: 8)
                     Text(vm.timerIsRunning ? "Running" : "Ready")
                         .font(.caption)
@@ -39,15 +39,16 @@ struct TimerView: View {
             }
             .controlSize(.large)
             .buttonStyle(.borderedProminent)
-            .tint(vm.timerIsRunning ? .red : .accentColor)
+            .tint(vm.timerIsRunning ? Color.balanceNegative : Color.accentPurple)
             .keyboardShortcut("t", modifiers: .command)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
         .background {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(.regularMaterial)
-                .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+                .fill(Color.cardBackground)
+                .stroke(Color.cardBorder.opacity(0.7), lineWidth: 1)
+                .shadow(color: .black.opacity(0.12), radius: 18, y: 8)
         }
     }
 }

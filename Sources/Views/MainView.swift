@@ -14,6 +14,7 @@ struct MainView: View {
         .toolbar {
             toolbarContent
         }
+        .background(Color.appBackground)
     }
 
     // MARK: - Sidebar
@@ -26,7 +27,7 @@ struct MainView: View {
             }
             .padding(16)
         }
-        .background(.background)
+        .background(Color.appChrome)
     }
 
     // MARK: - Detail
@@ -52,7 +53,7 @@ struct MainView: View {
                     .padding(.bottom, 24)
             }
         }
-        .background(.background)
+        .background(Color.appBackground)
         .frame(minWidth: 520)
     }
 

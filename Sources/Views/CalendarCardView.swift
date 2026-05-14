@@ -15,8 +15,9 @@ struct CalendarCardView: View {
         .padding(16)
         .background {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(.regularMaterial)
-                .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+                .fill(Color.cardBackground)
+                .stroke(Color.cardBorder.opacity(0.7), lineWidth: 1)
+                .shadow(color: .black.opacity(0.10), radius: 14, y: 6)
         }
     }
 
@@ -143,10 +144,10 @@ private struct CalendarDayCell: View {
                     ZStack {
                         if isSelected {
                             Circle()
-                                .fill(Color.accentColor)
+                                .fill(Color.accentPurple)
                         } else if isToday {
                             Circle()
-                                .strokeBorder(Color.accentColor, lineWidth: 1.5)
+                                .strokeBorder(Color.accentPurple, lineWidth: 1.5)
                         }
 
                         Text("\(day.number)")
@@ -181,7 +182,7 @@ private struct CalendarDayCell: View {
 
     private var foregroundColor: Color {
         if isSelected { return .white }
-        if isToday { return .accentColor }
+        if isToday { return .accentPurple }
         return .primary
     }
 }

@@ -7,6 +7,8 @@ struct TimeTrackerApp: App {
     var body: some Scene {
         WindowGroup {
             MainView(vm: vm)
+                .timeTrackerWindowStyle()
+                .tint(Color.accentPurple)
         }
         .defaultSize(width: 1060, height: 780)
         .windowResizability(.contentMinSize)
@@ -17,6 +19,7 @@ struct TimeTrackerApp: App {
 
         MenuBarExtra {
             MenuBarView(vm: vm)
+                .tint(Color.accentPurple)
         } label: {
             if vm.timerIsRunning {
                 Label(vm.timerDisplay, systemImage: "clock.fill")
@@ -28,6 +31,8 @@ struct TimeTrackerApp: App {
 
         Settings {
             StorageSettingsView(vm: vm)
+                .timeTrackerWindowStyle()
+                .tint(Color.accentPurple)
         }
     }
 
@@ -51,5 +56,32 @@ struct TimeTrackerApp: App {
             }
             .keyboardShortcut("r", modifiers: .command)
         }
+    }
+}
+
+private extension View {
+    func timeTrackerWindowStyle() -> some View {
+        background(WindowConfigurator())
+    }
+}
+
+private struct WindowConfigurator: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            guard let window = view.window else { return }
+            window.titlebarAppearsTransparent = true
+            window.titleVisibility = .hidden
+            window.backgroundColor = NSColor(Color.appChrome)
+            window.isMovableByWindowBackground = true
+        }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        guard let window = nsView.window else { return }
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        window.backgroundColor = NSColor(Color.appChrome)
     }
 }

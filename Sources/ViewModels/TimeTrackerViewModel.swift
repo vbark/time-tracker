@@ -1,5 +1,4 @@
 import SwiftUI
-import Combine
 
 @Observable
 @MainActor
@@ -8,8 +7,6 @@ final class TimeTrackerViewModel {
 
     var settings: AppSettings
     let storage: StorageService
-    let activityMonitor = ActivityMonitorService()
-    let notifications = TimerNotificationService()
     let launchAtLogin = LaunchAtLoginService()
 
     // MARK: - Entries
@@ -60,24 +57,6 @@ final class TimeTrackerViewModel {
         self.storage = storage ?? StorageService(settings: settings)
         loadData()
         restoreTimer()
-        startActivityMonitoring()
-    }
-
-    // MARK: - Activity Monitoring
-
-    private func startActivityMonitoring() {
-        notifications.configure { [weak self] in
-            self?.startTimer()
-        } snooze: { [weak self] in
-            self?.activityMonitor.userDeclined()
-        }
-
-        activityMonitor.startMonitoring(settings: settings, notifications: notifications) { [weak self] in
-            guard let self else { return false }
-            return MainActor.assumeIsolated {
-                self.timerIsRunning
-            }
-        }
     }
 
     // MARK: - Data Loading

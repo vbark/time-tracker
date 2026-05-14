@@ -45,8 +45,9 @@ struct StatisticsView: View {
         .padding(16)
         .background {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(.regularMaterial)
-                .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+                .fill(Color.cardBackground)
+                .stroke(Color.cardBorder.opacity(0.7), lineWidth: 1)
+                .shadow(color: .black.opacity(0.10), radius: 14, y: 6)
         }
     }
 
@@ -77,7 +78,7 @@ struct StatisticsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Color.secondaryCardBackground)
         }
     }
 }

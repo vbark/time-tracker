@@ -17,7 +17,8 @@ struct DaySummaryView: View {
         .padding(.vertical, 12)
         .background {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Color.cardBackground)
+                .stroke(Color.cardBorder.opacity(0.65), lineWidth: 1)
         }
     }
 

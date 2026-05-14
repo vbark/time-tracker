@@ -28,7 +28,7 @@ struct MenuBarView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(vm.timerIsRunning ? .green : .secondary.opacity(0.4))
+                        .fill(vm.timerIsRunning ? Color.balancePositive : .secondary.opacity(0.4))
                         .frame(width: 8, height: 8)
                     Text(vm.timerIsRunning ? "Running" : "Stopped")
                         .font(.caption)
@@ -56,7 +56,7 @@ struct MenuBarView: View {
                 }
                 .controlSize(.regular)
                 .buttonStyle(.borderedProminent)
-                .tint(vm.timerIsRunning ? .red : .accentColor)
+                .tint(vm.timerIsRunning ? Color.balanceNegative : Color.accentPurple)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
@@ -82,6 +82,7 @@ struct MenuBarView: View {
             .padding(.vertical, 8)
         }
         .frame(width: 260)
+        .background(Color.appBackground)
     }
 
     private var todaySection: some View {
@@ -102,7 +103,7 @@ struct MenuBarView: View {
                     .foregroundStyle(.tertiary)
             }
             ProgressView(value: min(todayHours / vm.settings.dailyTargetHours, 1.0))
-                .tint(todayHours >= vm.settings.dailyTargetHours ? .balancePositive : .accentColor)
+                .tint(todayHours >= vm.settings.dailyTargetHours ? .balancePositive : .accentPurple)
         }
     }
 }

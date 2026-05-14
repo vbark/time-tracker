@@ -19,7 +19,7 @@ struct ManualEntryView: View {
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "plus.circle.fill")
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(Color.accentPurple)
                     Text("Add Entry")
                         .fontWeight(.medium)
                     Spacer()
@@ -88,7 +88,8 @@ struct ManualEntryView: View {
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .background {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Color.cardBackground)
+                .stroke(Color.cardBorder.opacity(0.65), lineWidth: 1)
         }
         .alert("Invalid Time", isPresented: $showValidationError) {
             Button("OK", role: .cancel) {}

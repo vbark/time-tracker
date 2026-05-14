@@ -2,6 +2,14 @@ import SwiftUI
 
 // Catppuccin Latte (light) / Mocha (dark)
 extension Color {
+    // Core surfaces: Latte Base/Mantle/Crust and Mocha Base/Mantle/Crust.
+    static let appBackground = Color(light: .init(red: 0.937, green: 0.945, blue: 0.961),
+                                     dark: .init(red: 0.118, green: 0.118, blue: 0.180))
+    static let appChrome = Color(light: .init(red: 0.902, green: 0.914, blue: 0.937),
+                                 dark: .init(red: 0.094, green: 0.094, blue: 0.145))
+    static let appCrust = Color(light: .init(red: 0.863, green: 0.878, blue: 0.910),
+                                dark: .init(red: 0.067, green: 0.063, blue: 0.102))
+
     // Green: Latte #40a02b / Mocha #a6e3a1
     static let balancePositive = Color(light: .init(red: 0.251, green: 0.627, blue: 0.169),
                                        dark: .init(red: 0.651, green: 0.890, blue: 0.631))
@@ -30,15 +38,15 @@ extension Color {
     static let calendarToday = warningOrange
     static let calendarSelected = accentPurple
 
-    // Surfaces: Latte Base #eff1f5 / Mocha Base #1e1e2e
-    static let cardBackground = Color(light: .init(red: 0.937, green: 0.945, blue: 0.961),
-                                      dark: .init(red: 0.118, green: 0.118, blue: 0.180))
+    // Surface0/Surface1: Latte #ccd0da/#bcc0cc, Mocha #313244/#45475a.
+    static let cardBackground = Color(light: .init(red: 0.969, green: 0.973, blue: 0.984),
+                                      dark: .init(red: 0.192, green: 0.196, blue: 0.267))
+    static let secondaryCardBackground = Color(light: .init(red: 0.925, green: 0.933, blue: 0.957),
+                                               dark: .init(red: 0.271, green: 0.278, blue: 0.353))
     // Latte Surface0 #ccd0da / Mocha Surface0 #313244
     static let cardBorder = Color(light: .init(red: 0.800, green: 0.816, blue: 0.855),
                                   dark: .init(red: 0.192, green: 0.196, blue: 0.267))
-    // Latte Mantle #e6e9ef / Mocha Mantle #181825
-    static let subtleBackground = Color(light: .init(red: 0.902, green: 0.914, blue: 0.937),
-                                        dark: .init(red: 0.094, green: 0.094, blue: 0.145))
+    static let subtleBackground = appBackground
 
     init(light: Color, dark: Color) {
         self.init(nsColor: NSColor(name: nil) { appearance in

@@ -13,7 +13,6 @@ struct StorageSettingsView: View {
                 VStack(spacing: 14) {
                     targetCard
                     startupCard
-                    notificationCard
                 }
                 VStack(spacing: 14) {
                     storageCard
@@ -22,13 +21,10 @@ struct StorageSettingsView: View {
             Spacer(minLength: 0)
         }
         .padding(24)
-        .frame(width: 680, height: 520)
-        .background(Color.subtleBackground)
+        .frame(width: 680, height: 420)
+        .background(Color.appBackground)
         .onAppear {
             vm.launchAtLogin.refresh()
-            Task {
-                await vm.notifications.refreshAuthorizationStatus()
-            }
         }
         .fileImporter(
             isPresented: $showFileImporter,
@@ -46,7 +42,7 @@ struct StorageSettingsView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Settings")
                 .font(.system(.title2, design: .rounded, weight: .semibold))
-            Text("Keep Time Tracker ready, visible, and hard to forget.")
+            Text("Minimal setup. Calm defaults. No surprise prompts.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -69,36 +65,6 @@ struct StorageSettingsView: View {
                 set: { vm.launchAtLogin.setEnabled($0) }
             ))
             .toggleStyle(.switch)
-        }
-    }
-
-    private var notificationCard: some View {
-        SettingsCard(title: "Timer Notifications", systemImage: "bell.badge") {
-            Toggle("Enabled", isOn: $vm.settings.reminderEnabled)
-                .toggleStyle(.switch)
-
-            SettingsIntegerRow(
-                title: "Active delay",
-                suffix: "min",
-                value: $vm.settings.reminderDelayMinutes
-            )
-
-            SettingsIntegerRow(
-                title: "Snooze",
-                suffix: "min",
-                value: $vm.settings.reminderSnoozeMinutes
-            )
-
-            Divider()
-
-            HStack {
-                statusPill(text: vm.notifications.authorizationStatusText, isGood: vm.notifications.isAuthorized)
-                Spacer()
-                Button("Test") {
-                    vm.notifications.sendTestReminder()
-                }
-                .controlSize(.small)
-            }
         }
     }
 
@@ -129,20 +95,6 @@ struct StorageSettingsView: View {
             .controlSize(.small)
         }
     }
-
-    private func statusPill(text: String, isGood: Bool) -> some View {
-        Text(text)
-            .font(.caption)
-            .fontWeight(.medium)
-            .foregroundStyle(isGood ? Color.balancePositive : Color.warningOrange)
-            .lineLimit(1)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background {
-                Capsule()
-                    .fill((isGood ? Color.balancePositive : Color.warningOrange).opacity(0.12))
-            }
-    }
 }
 
 private struct SettingsCard<Content: View>: View {
@@ -162,8 +114,9 @@ private struct SettingsCard<Content: View>: View {
         .frame(width: 310, alignment: .topLeading)
         .background {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(.regularMaterial)
-                .stroke(Color.cardBorder.opacity(0.5), lineWidth: 1)
+                .fill(Color.cardBackground)
+                .stroke(Color.cardBorder.opacity(0.7), lineWidth: 1)
+                .shadow(color: .black.opacity(0.10), radius: 16, y: 8)
         }
     }
 }
@@ -185,27 +138,6 @@ private struct SettingsNumberRow: View {
             Text(suffix)
                 .foregroundStyle(.secondary)
                 .frame(width: 40, alignment: .leading)
-        }
-    }
-}
-
-private struct SettingsIntegerRow: View {
-    let title: String
-    let suffix: String
-    @Binding var value: Int
-
-    var body: some View {
-        HStack {
-            Text(title)
-                .lineLimit(1)
-            Spacer()
-            TextField("", value: $value, format: .number)
-                .textFieldStyle(.roundedBorder)
-                .multilineTextAlignment(.trailing)
-                .frame(width: 58)
-            Text(suffix)
-                .foregroundStyle(.secondary)
-                .frame(width: 28, alignment: .leading)
         }
     }
 }

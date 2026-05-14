@@ -42,11 +42,15 @@ struct EntriesListView: View {
 
                 VStack(spacing: 0) {
                     ForEach(vm.selectedDayEntries) { entry in
-                        EntryRow(entry: entry, isSelected: entry.id == selectedEntryID)
+                        Button {
+                            selectedEntryID = entry.id
+                        } label: {
+                            EntryRow(entry: entry, isSelected: entry.id == selectedEntryID)
+                        }
+                            .buttonStyle(.plain)
                             .contentShape(Rectangle())
-                            .onTapGesture {
-                                selectedEntryID = entry.id
-                            }
+                            .accessibilityLabel("\(entry.typeDisplay), \(entry.timeRangeDisplay), \(entry.duration)")
+                            .accessibilityHint("Select entry")
                             .contextMenu {
                                 Button("Edit") { editingEntry = entry }
                                 Divider()
@@ -64,7 +68,8 @@ struct EntriesListView: View {
         }
         .background {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Color.cardBackground)
+                .stroke(Color.cardBorder.opacity(0.65), lineWidth: 1)
         }
         .sheet(item: $editingEntry) { entry in
             EditEntrySheet(vm: vm, entry: entry)
@@ -95,7 +100,7 @@ private struct EntryRow: View {
     var body: some View {
         HStack(spacing: 12) {
             RoundedRectangle(cornerRadius: 3, style: .continuous)
-                .fill(entry.isOffDay ? Color.balanceNegative : Color.accentColor)
+                .fill(entry.isOffDay ? Color.balanceNegative : Color.accentPurple)
                 .frame(width: 4, height: 32)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -130,7 +135,7 @@ private struct EntryRow: View {
         .background {
             if isSelected {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(Color.accentColor.opacity(0.08))
+                    .fill(Color.accentPurple.opacity(0.12))
             }
         }
     }

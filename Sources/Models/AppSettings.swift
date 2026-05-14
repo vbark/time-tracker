@@ -6,9 +6,6 @@ final class AppSettings {
     @ObservationIgnored @AppStorage("dailyTargetHours") var dailyTargetHours: Double = 8.0
     @ObservationIgnored @AppStorage("csvFilePath") var csvFilePath: String = ""
     @ObservationIgnored @AppStorage("showMenuBarExtra") var showMenuBarExtra: Bool = true
-    @ObservationIgnored @AppStorage("reminderEnabled") var reminderEnabled: Bool = true
-    @ObservationIgnored @AppStorage("reminderDelayMinutes") var reminderDelayMinutes: Int = 2
-    @ObservationIgnored @AppStorage("reminderSnoozeMinutes") var reminderSnoozeMinutes: Int = 30
 
     var weeklyTargetHours: Double { dailyTargetHours * 5 }
 
