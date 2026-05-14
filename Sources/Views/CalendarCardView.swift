@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// Month calendar with navigation and color-coded days.
-/// Work days = green, off-only days = red, today = orange, selected = purple.
 struct CalendarCardView: View {
     @Bindable var vm: TimeTrackerViewModel
 
@@ -9,25 +7,25 @@ struct CalendarCardView: View {
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
 
     var body: some View {
-        GroupBox {
-            VStack(spacing: 8) {
-                monthNavigation
-                weekdayHeaders
-                calendarGrid
-            }
-            .padding(.vertical, 4)
-        } label: {
-            Label("Calendar", systemImage: "calendar")
-                .font(.headline)
+        VStack(spacing: 10) {
+            monthNavigation
+            weekdayHeaders
+            calendarGrid
+        }
+        .padding(16)
+        .background {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(.regularMaterial)
+                .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
         }
     }
-
-    // MARK: - Month Navigation
 
     private var monthNavigation: some View {
         HStack {
             Button { vm.previousMonth() } label: {
                 Image(systemName: "chevron.left")
+                    .font(.caption.weight(.semibold))
+                    .frame(width: 24, height: 24)
             }
             .buttonStyle(.borderless)
 
@@ -40,29 +38,28 @@ struct CalendarCardView: View {
 
             Button { vm.nextMonth() } label: {
                 Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .frame(width: 24, height: 24)
             }
             .buttonStyle(.borderless)
         }
     }
-
-    // MARK: - Weekday Headers
 
     private var weekdayHeaders: some View {
         LazyVGrid(columns: columns, spacing: 2) {
             ForEach(weekdays, id: \.self) { day in
                 Text(day)
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.tertiary)
                     .frame(maxWidth: .infinity)
             }
         }
     }
 
-    // MARK: - Calendar Grid
-
     private var calendarGrid: some View {
         let days = calendarDays()
-        return LazyVGrid(columns: columns, spacing: 2) {
+        return LazyVGrid(columns: columns, spacing: 4) {
             ForEach(days, id: \.id) { day in
                 CalendarDayCell(
                     day: day,
@@ -79,8 +76,6 @@ struct CalendarCardView: View {
         }
     }
 
-    // MARK: - Day Generation
-
     private func calendarDays() -> [CalendarDay] {
         let cal = Calendar.current
         let year = cal.component(.year, from: vm.selectedDate)
@@ -88,7 +83,6 @@ struct CalendarCardView: View {
         let firstOfMonth = cal.date(from: DateComponents(year: year, month: month, day: 1))!
 
         let firstWeekday = cal.component(.weekday, from: firstOfMonth)
-        // Convert Sunday=1 to Monday-first offset
         let leadingEmpty = (firstWeekday + 5) % 7
         let daysInMonth = cal.range(of: .day, in: .month, for: firstOfMonth)!.count
 
@@ -97,12 +91,10 @@ struct CalendarCardView: View {
 
         var days: [CalendarDay] = []
 
-        // Leading empty cells
         for i in 0..<leadingEmpty {
             days.append(CalendarDay(id: "empty-\(i)", number: 0, date: nil))
         }
 
-        // Actual days
         for day in 1...daysInMonth {
             let date = cal.date(from: DateComponents(year: year, month: month, day: day))!
             let dateStr = DateFormatter.isoDate.string(from: date)
@@ -123,8 +115,6 @@ struct CalendarCardView: View {
     }
 }
 
-// MARK: - Calendar Day Model
-
 private struct CalendarDay {
     let id: String
     let number: Int
@@ -134,8 +124,6 @@ private struct CalendarDay {
     var hasWork = false
     var hasOffOnly = false
 }
-
-// MARK: - Calendar Day Cell
 
 private struct CalendarDayCell: View {
     let day: CalendarDay
@@ -148,33 +136,51 @@ private struct CalendarDayCell: View {
     var body: some View {
         Group {
             if day.number == 0 {
-                Text("")
-                    .frame(maxWidth: .infinity, minHeight: 28)
+                Color.clear
+                    .frame(height: 30)
             } else {
                 Button(action: action) {
-                    Text("\(day.number)")
-                        .font(.caption)
-                        .fontWeight(isSelected || isToday ? .bold : .regular)
-                        .frame(maxWidth: .infinity, minHeight: 28)
-                        .foregroundStyle(foregroundColor)
-                        .background(backgroundColor, in: RoundedRectangle(cornerRadius: 4))
+                    ZStack {
+                        if isSelected {
+                            Circle()
+                                .fill(Color.accentColor)
+                        } else if isToday {
+                            Circle()
+                                .strokeBorder(Color.accentColor, lineWidth: 1.5)
+                        }
+
+                        Text("\(day.number)")
+                            .font(.system(size: 12, weight: fontWeight))
+                            .foregroundStyle(foregroundColor)
+                    }
+                    .frame(width: 30, height: 30)
                 }
                 .buttonStyle(.plain)
+                .overlay(alignment: .bottom) {
+                    if hasWork && !isSelected {
+                        Circle()
+                            .fill(Color.calendarWork)
+                            .frame(width: 4, height: 4)
+                            .offset(y: -2)
+                    } else if hasOffOnly && !isSelected {
+                        Circle()
+                            .fill(Color.calendarOff)
+                            .frame(width: 4, height: 4)
+                            .offset(y: -2)
+                    }
+                }
             }
         }
     }
 
-    private var foregroundColor: Color {
-        if isSelected { return .white }
-        if isToday { return .black }
-        if hasWork { return .calendarWork }
-        if hasOffOnly { return .calendarOff }
-        return .primary
+    private var fontWeight: Font.Weight {
+        if isSelected || isToday { return .semibold }
+        return .regular
     }
 
-    private var backgroundColor: Color {
-        if isSelected { return .calendarSelected }
-        if isToday { return .calendarToday }
-        return .clear
+    private var foregroundColor: Color {
+        if isSelected { return .white }
+        if isToday { return .accentColor }
+        return .primary
     }
 }

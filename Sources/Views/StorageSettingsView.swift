@@ -1,8 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Settings view for configuring storage paths and daily target hours.
-/// Presented via the Settings scene (Cmd+,).
 struct StorageSettingsView: View {
     @Bindable var vm: TimeTrackerViewModel
 
@@ -39,20 +37,47 @@ struct StorageSettingsView: View {
                             .truncationMode(.middle)
                     }
 
-                    HStack {
-                        statusIndicator
-                        Spacer()
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(vm.storage.hasWarning ? .orange : .green)
+                            .frame(width: 8, height: 8)
+                        Text(vm.storage.statusMessage)
+                            .font(.caption)
+                            .foregroundStyle(vm.storage.hasWarning ? .orange : .secondary)
                     }
                 }
 
                 HStack {
                     Button("Choose File...") { showFileImporter = true }
-                    Button("Reset to Default") { resetStorage() }
+                    Button("Reset to Default") {
+                        vm.storage.resetToDefault()
+                        vm.refreshData()
+                    }
                 }
+            }
+
+            Section("Timer Reminder") {
+                HStack {
+                    Text("Remind after idle (minutes)")
+                    Spacer()
+                    TextField("Minutes", value: $vm.settings.reminderDelayMinutes, format: .number)
+                        .frame(width: 60)
+                        .textFieldStyle(.roundedBorder)
+                        .multilineTextAlignment(.trailing)
+                }
+                HStack {
+                    Text("Snooze after decline (minutes)")
+                    Spacer()
+                    TextField("Minutes", value: $vm.settings.reminderSnoozeMinutes, format: .number)
+                        .frame(width: 60)
+                        .textFieldStyle(.roundedBorder)
+                        .multilineTextAlignment(.trailing)
+                }
+                Toggle("Enable timer reminders", isOn: $vm.settings.reminderEnabled)
             }
         }
         .formStyle(.grouped)
-        .frame(minWidth: 420, minHeight: 250)
+        .frame(minWidth: 440, minHeight: 350)
         .fileImporter(
             isPresented: $showFileImporter,
             allowedContentTypes: [UTType(filenameExtension: "csv") ?? .commaSeparatedText],
@@ -63,21 +88,5 @@ struct StorageSettingsView: View {
                 vm.refreshData()
             }
         }
-    }
-
-    private var statusIndicator: some View {
-        HStack(spacing: 4) {
-            Circle()
-                .fill(vm.storage.hasWarning ? .orange : .green)
-                .frame(width: 8, height: 8)
-            Text(vm.storage.statusMessage)
-                .font(.caption)
-                .foregroundStyle(vm.storage.hasWarning ? .orange : .secondary)
-        }
-    }
-
-    private func resetStorage() {
-        vm.storage.resetToDefault()
-        vm.refreshData()
     }
 }

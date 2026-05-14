@@ -1,43 +1,44 @@
 import SwiftUI
 
-/// Compact summary bar showing selected day's total hours, balance, entry count, and status.
 struct DaySummaryView: View {
     let vm: TimeTrackerViewModel
 
     var body: some View {
-        GroupBox {
-            HStack(spacing: 24) {
-                summaryItem(label: "Total", value: totalText, color: totalColor)
-                summaryItem(label: "Balance", value: balanceText, color: balanceColor)
-                summaryItem(label: "Entries", value: "\(workEntryCount)", color: .accentBlue)
-                Spacer()
-                statusBadge
-            }
-            .padding(.vertical, 4)
+        HStack(spacing: 0) {
+            statPill(label: "Worked", value: totalText, color: totalColor)
+            Spacer()
+            statPill(label: "Balance", value: balanceText, color: balanceColor)
+            Spacer()
+            statPill(label: "Entries", value: "\(workEntryCount)", color: .accentBlue)
+            Spacer()
+            statusBadge
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(.ultraThinMaterial)
         }
     }
 
-    // MARK: - Summary Items
-
-    private func summaryItem(label: String, value: String, color: Color) -> some View {
+    private func statPill(label: String, value: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .textCase(.uppercase)
             Text(value)
-                .font(.system(.title3, design: .rounded, weight: .bold))
+                .font(.system(.title3, design: .rounded, weight: .semibold))
                 .foregroundStyle(color)
         }
     }
-
-    // MARK: - Computed Display Values
 
     private var totalText: String {
         vm.dayIsAllOff ? "Off Day" : HoursFormatter.duration(vm.dayTotalHours)
     }
 
     private var totalColor: Color {
-        vm.dayIsAllOff ? .balanceNegative : .accentPurple
+        vm.dayIsAllOff ? .balanceNegative : .primary
     }
 
     private var balanceText: String {
@@ -56,19 +57,26 @@ struct DaySummaryView: View {
 
     private var statusBadge: some View {
         Text(statusText)
-            .font(.callout)
+            .font(.caption)
+            .fontWeight(.medium)
             .foregroundStyle(statusColor)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background {
+                Capsule()
+                    .fill(statusColor.opacity(0.12))
+            }
     }
 
     private var statusText: String {
         if vm.dayIsAllOff { return "Day Off" }
         if vm.selectedDayEntries.isEmpty { return "No entries" }
-        if vm.dayBalance > 0 { return "Overtime!" }
+        if vm.dayBalance > 0 { return "Overtime" }
         if vm.dayBalance == 0 { return "Target met" }
         let remaining = vm.settings.dailyTargetHours - vm.dayTotalHours
         let h = Int(remaining)
         let m = Int((remaining - Double(h)) * 60)
-        return "\(h)h \(m)m to go"
+        return "\(h)h \(m)m left"
     }
 
     private var statusColor: Color {

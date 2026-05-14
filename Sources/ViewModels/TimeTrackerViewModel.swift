@@ -1,8 +1,6 @@
 import SwiftUI
 import Combine
 
-/// Central business logic for the time tracker. Owns all state: entries, timer, calendar, stats.
-/// Views observe this via @Observable; SwiftUI only re-evaluates bodies that read changed properties.
 @Observable
 @MainActor
 final class TimeTrackerViewModel {
@@ -10,6 +8,7 @@ final class TimeTrackerViewModel {
 
     var settings: AppSettings
     let storage: StorageService
+    let activityMonitor = ActivityMonitorService()
 
     // MARK: - Entries
 
@@ -28,7 +27,7 @@ final class TimeTrackerViewModel {
         didSet { updateDerivedState() }
     }
 
-    // MARK: - Derived State (pre-computed, not in body)
+    // MARK: - Derived State
 
     private(set) var selectedDayEntries: [TimeEntry] = []
     private(set) var dayTotalHours: Double = 0
@@ -49,10 +48,12 @@ final class TimeTrackerViewModel {
     private(set) var totalDays: Int = 0
     private(set) var averageDailyHours: Double = 0
 
-    /// Dates that have work entries (for calendar coloring)
     private(set) var datesWithWork: Set<String> = []
-    /// Dates that only have off-day entries
     private(set) var datesWithOffOnly: Set<String> = []
+
+    var showTimerPrompt: Bool {
+        activityMonitor.shouldShowPrompt
+    }
 
     // MARK: - Init
 
@@ -61,6 +62,18 @@ final class TimeTrackerViewModel {
         self.storage = storage ?? StorageService(settings: settings)
         loadData()
         restoreTimer()
+        startActivityMonitoring()
+    }
+
+    // MARK: - Activity Monitoring
+
+    private func startActivityMonitoring() {
+        activityMonitor.startMonitoring(settings: settings) { [weak self] in
+            guard let self else { return false }
+            return MainActor.assumeIsolated {
+                self.timerIsRunning
+            }
+        }
     }
 
     // MARK: - Data Loading
@@ -110,7 +123,6 @@ final class TimeTrackerViewModel {
         TimerPersistenceService.clear()
     }
 
-    /// Formatted elapsed time "HH:MM:SS"
     var timerDisplay: String {
         let total = Int(timerElapsed)
         let h = total / 3600
@@ -282,21 +294,15 @@ final class TimeTrackerViewModel {
         }.count
     }
 
-    // MARK: - Derived State Update
-
-    /// Recompute all derived state from entries + selectedDate.
-    /// Called after any mutation. Keeps body computation trivial.
     private func updateDerivedState() {
         let cal = Calendar.current
         let dateStr = DateFormatter.isoDate.string(from: selectedDate)
 
-        // Selected day
         selectedDayEntries = entries.filter { $0.dateString == dateStr }
         dayTotalHours = dailyHours(for: dateStr)
         dayBalance = dailyBalance(for: dateStr)
         dayIsAllOff = !selectedDayEntries.isEmpty && selectedDayEntries.allSatisfy(\.isOffDay)
 
-        // Week (ISO: Monday-Sunday)
         let weekday = cal.component(.weekday, from: selectedDate)
         let daysFromMonday = (weekday + 5) % 7
         let monday = cal.date(byAdding: .day, value: -daysFromMonday, to: selectedDate)!
@@ -306,7 +312,6 @@ final class TimeTrackerViewModel {
         weekBalance = weekDates.reduce(0) { $0 + dailyBalance(for: $1) }
         weekDays = workedDays(in: weekDates)
 
-        // Month
         let year = cal.component(.year, from: selectedDate)
         let month = cal.component(.month, from: selectedDate)
         let firstOfMonth = cal.date(from: DateComponents(year: year, month: month, day: 1))!
@@ -318,14 +323,12 @@ final class TimeTrackerViewModel {
         self.monthDays = workedDays(in: monthDates)
         monthWeekdays = weekdaysInMonth(year: year, month: month)
 
-        // Overall
         let allDates = Set(entries.map(\.dateString))
         totalHours = allDates.reduce(0) { $0 + dailyHours(for: $1) }
         totalBalance = allDates.reduce(0) { $0 + dailyBalance(for: $1) }
         totalDays = workedDays(in: allDates)
         averageDailyHours = totalDays > 0 ? totalHours / Double(totalDays) : 0
 
-        // Calendar color sets
         var work = Set<String>()
         var offOnly = Set<String>()
         for dateStr in allDates {

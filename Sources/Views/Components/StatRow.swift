@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// Reusable key-value row for statistics display. Label left, value right.
 struct StatRow: View {
     let label: String
     let value: String
@@ -9,11 +8,11 @@ struct StatRow: View {
     var body: some View {
         HStack {
             Text(label)
-                .font(.subheadline)
+                .font(.caption)
                 .foregroundStyle(.secondary)
             Spacer()
             Text(value)
-                .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                .font(.system(.caption, design: .rounded, weight: .semibold))
                 .foregroundStyle(valueColor)
         }
     }

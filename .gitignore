@@ -1,7 +1,11 @@
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+
 # Xcode
 *.xcodeproj/xcuserdata/
 *.xcworkspace/xcuserdata/
-*.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
 DerivedData/
 build/
 *.moved-aside
@@ -18,12 +22,11 @@ build/
 *.dSYM.zip
 *.dSYM
 
-# Swift Package Manager
-.build/
-Packages/
-Package.resolved
-
 # macOS
 .DS_Store
 *.swp
 *~
+
+# IDE
+.vscode/
+.idea/
