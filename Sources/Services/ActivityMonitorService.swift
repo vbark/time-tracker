@@ -56,7 +56,7 @@ final class ActivityMonitorService {
 
     private func onUserBecameActive() {
         guard isMonitoring, !isTimerRunning(), shouldRemind() else { return }
-        scheduleDelayedPrompt()
+        notifyAfterReturnToDevice()
     }
 
     private func startPeriodicCheck() {
@@ -84,19 +84,17 @@ final class ActivityMonitorService {
         }
     }
 
-    private func scheduleDelayedPrompt() {
-        guard let settings else { return }
-        let delay = TimeInterval(settings.reminderDelayMinutes * 60)
+    private func notifyAfterLoginIfNeeded() {
         Task {
-            try? await Task.sleep(for: .seconds(delay))
+            try? await Task.sleep(for: .seconds(5))
             guard isMonitoring, !isTimerRunning(), shouldRemind() else { return }
             showNotification()
         }
     }
 
-    private func notifyAfterLoginIfNeeded() {
+    private func notifyAfterReturnToDevice() {
         Task {
-            try? await Task.sleep(for: .seconds(5))
+            try? await Task.sleep(for: .seconds(2))
             guard isMonitoring, !isTimerRunning(), shouldRemind() else { return }
             showNotification()
         }
@@ -117,8 +115,9 @@ final class ActivityMonitorService {
     }
 
     private func showNotification() {
-        lastNotificationTime = Date()
-        notifications?.showReminder()
+        if notifications?.showReminder() == true {
+            lastNotificationTime = Date()
+        }
     }
 
     private func isWeekend() -> Bool {

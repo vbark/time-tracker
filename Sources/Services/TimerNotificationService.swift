@@ -1,6 +1,7 @@
 import Foundation
 import UserNotifications
 
+@Observable
 @MainActor
 final class TimerNotificationService: NSObject, @preconcurrency UNUserNotificationCenterDelegate {
     private enum Identifier {
@@ -13,6 +14,8 @@ final class TimerNotificationService: NSObject, @preconcurrency UNUserNotificati
     private let center = UNUserNotificationCenter.current()
     private var startAction: (@MainActor () -> Void)?
     private var snoozeAction: (@MainActor () -> Void)?
+    private(set) var authorizationStatusText = "Checking..."
+    private(set) var isAuthorized = false
 
     func configure(start: @escaping @MainActor () -> Void, snooze: @escaping @MainActor () -> Void) {
         startAction = start
@@ -37,12 +40,16 @@ final class TimerNotificationService: NSObject, @preconcurrency UNUserNotificati
         )
         center.setNotificationCategories([category])
 
-        Task {
-            _ = try? await center.requestAuthorization(options: [.alert, .sound])
-        }
+        requestAuthorization()
     }
 
-    func showReminder() {
+    @discardableResult
+    func showReminder() -> Bool {
+        guard isAuthorized else {
+            requestAuthorization()
+            return false
+        }
+
         let content = UNMutableNotificationContent()
         content.title = "Start tracking?"
         content.body = "You are active, but the timer is not running."
@@ -55,6 +62,43 @@ final class TimerNotificationService: NSObject, @preconcurrency UNUserNotificati
             trigger: nil
         )
         center.add(request)
+        return true
+    }
+
+    func sendTestReminder() {
+        showReminder()
+    }
+
+    func requestAuthorization() {
+        Task {
+            let granted = (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
+            isAuthorized = granted
+            await refreshAuthorizationStatus()
+        }
+    }
+
+    func refreshAuthorizationStatus() async {
+        let settings = await center.notificationSettings()
+        switch settings.authorizationStatus {
+        case .authorized:
+            authorizationStatusText = "Notifications enabled"
+            isAuthorized = true
+        case .provisional:
+            authorizationStatusText = "Notifications enabled quietly"
+            isAuthorized = true
+        case .ephemeral:
+            authorizationStatusText = "Notifications enabled temporarily"
+            isAuthorized = true
+        case .denied:
+            authorizationStatusText = "Notifications disabled in System Settings"
+            isAuthorized = false
+        case .notDetermined:
+            authorizationStatusText = "Permission not requested"
+            isAuthorized = false
+        @unknown default:
+            authorizationStatusText = "Notification status unknown"
+            isAuthorized = false
+        }
     }
 
     func userNotificationCenter(
