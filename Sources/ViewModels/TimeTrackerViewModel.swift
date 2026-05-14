@@ -9,6 +9,8 @@ final class TimeTrackerViewModel {
     var settings: AppSettings
     let storage: StorageService
     let activityMonitor = ActivityMonitorService()
+    let notifications = TimerNotificationService()
+    let launchAtLogin = LaunchAtLoginService()
 
     // MARK: - Entries
 
@@ -51,10 +53,6 @@ final class TimeTrackerViewModel {
     private(set) var datesWithWork: Set<String> = []
     private(set) var datesWithOffOnly: Set<String> = []
 
-    var showTimerPrompt: Bool {
-        activityMonitor.shouldShowPrompt
-    }
-
     // MARK: - Init
 
     init(settings: AppSettings = AppSettings(), storage: StorageService? = nil) {
@@ -68,7 +66,13 @@ final class TimeTrackerViewModel {
     // MARK: - Activity Monitoring
 
     private func startActivityMonitoring() {
-        activityMonitor.startMonitoring(settings: settings) { [weak self] in
+        notifications.configure { [weak self] in
+            self?.startTimer()
+        } snooze: { [weak self] in
+            self?.activityMonitor.userDeclined()
+        }
+
+        activityMonitor.startMonitoring(settings: settings, notifications: notifications) { [weak self] in
             guard let self else { return false }
             return MainActor.assumeIsolated {
                 self.timerIsRunning

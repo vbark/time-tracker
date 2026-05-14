@@ -56,9 +56,19 @@ struct StorageSettingsView: View {
                 }
             }
 
-            Section("Timer Reminder") {
+            Section("Startup") {
+                Toggle("Open Time Tracker at login", isOn: Binding(
+                    get: { vm.launchAtLogin.isEnabled },
+                    set: { vm.launchAtLogin.setEnabled($0) }
+                ))
+                Text(vm.launchAtLogin.statusMessage)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Timer Notifications") {
                 HStack {
-                    Text("Remind after idle (minutes)")
+                    Text("Notify after active (minutes)")
                     Spacer()
                     TextField("Minutes", value: $vm.settings.reminderDelayMinutes, format: .number)
                         .frame(width: 60)
@@ -73,11 +83,14 @@ struct StorageSettingsView: View {
                         .textFieldStyle(.roundedBorder)
                         .multilineTextAlignment(.trailing)
                 }
-                Toggle("Enable timer reminders", isOn: $vm.settings.reminderEnabled)
+                Toggle("Enable timer notifications", isOn: $vm.settings.reminderEnabled)
             }
         }
         .formStyle(.grouped)
-        .frame(minWidth: 440, minHeight: 350)
+        .frame(minWidth: 460, minHeight: 430)
+        .onAppear {
+            vm.launchAtLogin.refresh()
+        }
         .fileImporter(
             isPresented: $showFileImporter,
             allowedContentTypes: [UTType(filenameExtension: "csv") ?? .commaSeparatedText],

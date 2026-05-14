@@ -5,19 +5,23 @@ import IOKit
 @Observable
 @MainActor
 final class ActivityMonitorService {
-    private(set) var shouldShowPrompt = false
-
     private var checkTimer: Timer?
     private var lastDeclineTime: Date?
-    private var lastPromptDismissTime: Date?
+    private var lastNotificationTime: Date?
     private var isMonitoring = false
 
     private var isTimerRunning: () -> Bool = { false }
     private var settings: AppSettings?
+    private var notifications: TimerNotificationService?
 
-    func startMonitoring(settings: AppSettings, isTimerRunning: @escaping @Sendable () -> Bool) {
+    func startMonitoring(
+        settings: AppSettings,
+        notifications: TimerNotificationService,
+        isTimerRunning: @escaping @Sendable () -> Bool
+    ) {
         guard !isMonitoring else { return }
         self.settings = settings
+        self.notifications = notifications
         self.isTimerRunning = isTimerRunning
         isMonitoring = true
 
@@ -34,6 +38,7 @@ final class ActivityMonitorService {
         }
 
         startPeriodicCheck()
+        notifyAfterLoginIfNeeded()
     }
 
     func stopMonitoring() {
@@ -44,13 +49,7 @@ final class ActivityMonitorService {
     }
 
     func userDeclined() {
-        shouldShowPrompt = false
         lastDeclineTime = Date()
-    }
-
-    func userDismissed() {
-        shouldShowPrompt = false
-        lastPromptDismissTime = Date()
     }
 
     // MARK: - Private
@@ -73,17 +72,15 @@ final class ActivityMonitorService {
         guard isMonitoring else { return }
         guard let settings, settings.reminderEnabled else { return }
         guard !isTimerRunning() else {
-            shouldShowPrompt = false
             return
         }
-        guard !shouldShowPrompt else { return }
         guard shouldRemind() else { return }
 
         let idleSeconds = systemIdleTime()
         let delaySeconds = TimeInterval(settings.reminderDelayMinutes * 60)
 
         if idleSeconds < delaySeconds && !isWeekend() {
-            shouldShowPrompt = true
+            showNotification()
         }
     }
 
@@ -93,7 +90,15 @@ final class ActivityMonitorService {
         Task {
             try? await Task.sleep(for: .seconds(delay))
             guard isMonitoring, !isTimerRunning(), shouldRemind() else { return }
-            shouldShowPrompt = true
+            showNotification()
+        }
+    }
+
+    private func notifyAfterLoginIfNeeded() {
+        Task {
+            try? await Task.sleep(for: .seconds(5))
+            guard isMonitoring, !isTimerRunning(), shouldRemind() else { return }
+            showNotification()
         }
     }
 
@@ -105,10 +110,15 @@ final class ActivityMonitorService {
         if let decline = lastDeclineTime, Date().timeIntervalSince(decline) < snoozeInterval {
             return false
         }
-        if let dismiss = lastPromptDismissTime, Date().timeIntervalSince(dismiss) < snoozeInterval {
+        if let notification = lastNotificationTime, Date().timeIntervalSince(notification) < snoozeInterval {
             return false
         }
         return true
+    }
+
+    private func showNotification() {
+        lastNotificationTime = Date()
+        notifications?.showReminder()
     }
 
     private func isWeekend() -> Bool {

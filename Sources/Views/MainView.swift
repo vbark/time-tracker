@@ -14,11 +14,6 @@ struct MainView: View {
         .toolbar {
             toolbarContent
         }
-        .overlay {
-            if vm.showTimerPrompt {
-                TimerPromptOverlay(vm: vm)
-            }
-        }
     }
 
     // MARK: - Sidebar
