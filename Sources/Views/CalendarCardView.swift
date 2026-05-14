@@ -137,7 +137,7 @@ private struct CalendarDayCell: View {
         Group {
             if day.number == 0 {
                 Color.clear
-                    .frame(height: 30)
+                    .frame(height: 36)
             } else {
                 Button(action: action) {
                     ZStack {
@@ -153,7 +153,8 @@ private struct CalendarDayCell: View {
                             .font(.system(size: 12, weight: fontWeight))
                             .foregroundStyle(foregroundColor)
                     }
-                    .frame(width: 30, height: 30)
+                    .frame(width: 36, height: 36)
+                    .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
                 .overlay(alignment: .bottom) {
@@ -161,12 +162,12 @@ private struct CalendarDayCell: View {
                         Circle()
                             .fill(Color.calendarWork)
                             .frame(width: 4, height: 4)
-                            .offset(y: -2)
+                            .offset(y: -1)
                     } else if hasOffOnly && !isSelected {
                         Circle()
                             .fill(Color.calendarOff)
                             .frame(width: 4, height: 4)
-                            .offset(y: -2)
+                            .offset(y: -1)
                     }
                 }
             }

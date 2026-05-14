@@ -82,9 +82,10 @@ struct ManualEntryView: View {
                     }
                 }
                 .padding(16)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .transition(.opacity)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .background {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(.ultraThinMaterial)

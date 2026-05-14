@@ -8,15 +8,21 @@ struct TimeTrackerApp: App {
         WindowGroup {
             MainView(vm: vm)
         }
-        .defaultSize(width: 960, height: 680)
+        .defaultSize(width: 1060, height: 780)
         .windowResizability(.contentMinSize)
         .windowToolbarStyle(.unified(showsTitle: false))
         .commands {
             appCommands
         }
 
-        MenuBarExtra("Time Tracker", systemImage: vm.timerIsRunning ? "clock.fill" : "clock") {
+        MenuBarExtra {
             MenuBarView(vm: vm)
+        } label: {
+            if vm.timerIsRunning {
+                Label(vm.timerDisplay, systemImage: "clock.fill")
+            } else {
+                Label("Time Tracker", systemImage: "clock")
+            }
         }
         .menuBarExtraStyle(.window)
 
