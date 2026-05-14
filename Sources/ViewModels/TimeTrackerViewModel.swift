@@ -121,6 +121,12 @@ final class TimeTrackerViewModel {
         timerStartTime = nil
         timerElapsed = 0
         TimerPersistenceService.clear()
+        triggerConfetti()
+    }
+
+    private func triggerConfetti() {
+        guard let url = URL(string: "raycast-x://extensions/raycast/raycast/confetti") else { return }
+        NSWorkspace.shared.open(url)
     }
 
     var timerDisplay: String {
