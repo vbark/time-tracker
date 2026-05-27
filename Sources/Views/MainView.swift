@@ -40,22 +40,19 @@ struct MainView: View {
     private var detailContent: some View {
         ScrollView {
             VStack(spacing: 16) {
-                Group {
-                    if showsStatistics {
-                        StatisticsPanelView(vm: vm)
-                    } else {
-                        TimerView(vm: vm)
-                    }
+                if showsStatistics {
+                    StatisticsPanelView(vm: vm)
+                } else {
+                    TimerView(vm: vm)
+                    DaySummaryView(vm: vm)
+                    ManualEntryView(vm: vm)
+                    EntriesListView(vm: vm)
                 }
-                .animation(.easeInOut(duration: 0.2), value: showsStatistics)
-
-                DaySummaryView(vm: vm)
-                ManualEntryView(vm: vm)
-                EntriesListView(vm: vm)
             }
             .padding(.horizontal, 24)
             .padding(.top, 4)
             .padding(.bottom, 24)
+            .animation(.easeInOut(duration: 0.2), value: showsStatistics)
         }
         .scrollIndicators(.automatic)
         .background(Color.appBackground)

@@ -27,11 +27,13 @@ struct StatisticsPanelView: View {
     let vm: TimeTrackerViewModel
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 0) {
             statsSection(title: "Day") {
                 StatRow(label: "Worked", value: HoursFormatter.duration(vm.dayTotalHours), valueColor: .balancePositive)
                 StatRow(label: "Balance", value: HoursFormatter.signedBalance(vm.dayBalance), valueColor: .balanceColor(for: vm.dayBalance))
             }
+
+            statsDivider
 
             statsSection(title: "Week") {
                 StatRow(label: "Worked", value: HoursFormatter.duration(vm.weekHours), valueColor: .balancePositive)
@@ -43,6 +45,8 @@ struct StatisticsPanelView: View {
                 StatRow(label: "Balance", value: HoursFormatter.signedBalance(vm.weekBalance), valueColor: .balanceColor(for: vm.weekBalance))
             }
 
+            statsDivider
+
             statsSection(title: "Month") {
                 StatRow(label: "Worked", value: HoursFormatter.duration(vm.monthHours), valueColor: .balancePositive)
                 StatRow(
@@ -52,6 +56,8 @@ struct StatisticsPanelView: View {
                 )
                 StatRow(label: "Balance", value: HoursFormatter.signedBalance(vm.monthBalance), valueColor: .balanceColor(for: vm.monthBalance))
             }
+
+            statsDivider
 
             statsSection(title: "Overall") {
                 StatRow(label: "Worked", value: HoursFormatter.duration(vm.totalHours), valueColor: .balancePositive)
@@ -83,6 +89,12 @@ struct StatisticsPanelView: View {
         }
     }
 
+    private var statsDivider: some View {
+        Divider()
+            .overlay(Color.cardBorder.opacity(0.55))
+            .padding(.horizontal, 12)
+    }
+
     private func statsSection(title: String, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
@@ -96,10 +108,5 @@ struct StatisticsPanelView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.cardBackground.opacity(0.7))
-                .stroke(Color.cardBorder.opacity(0.45), lineWidth: 1)
-        }
     }
 }
