@@ -51,7 +51,7 @@ struct MainView: View {
             }
             .padding(.horizontal, 24)
             .padding(.top, 4)
-            .padding(.bottom, 24)
+            .padding(.bottom, 12)
             .animation(.easeInOut(duration: 0.2), value: showsStatistics)
         }
         .scrollIndicators(.automatic)

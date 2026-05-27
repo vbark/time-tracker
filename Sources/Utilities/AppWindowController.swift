@@ -11,8 +11,8 @@ enum AppWindowID {
 
 @MainActor
 enum AppWindowController {
-    /// Default launch size (780×800 content).
-    static let defaultSize = NSSize(width: 780, height: 800)
+    /// Default launch size (780×560 content, ~30% shorter than prior 800pt height).
+    static let defaultSize = NSSize(width: 780, height: 560)
 
     static func openMainWindow() {
         NSApp.activate(ignoringOtherApps: true)
@@ -54,10 +54,17 @@ enum AppWindowController {
 
     static func applyDefaultFrameIfNeeded(to window: NSWindow) {
         let size = defaultSize
-        guard window.frame.width < size.width - 20 || window.frame.height < size.height - 20 else {
+        let current = window.contentLayoutRect.size
+
+        if current.width < size.width - 20 || current.height < size.height - 20 {
+            window.setContentSize(size)
+            window.center()
             return
         }
-        window.setContentSize(size)
-        window.center()
+
+        if current.height > size.height + 40 {
+            window.setContentSize(NSSize(width: max(current.width, size.width), height: size.height))
+            window.center()
+        }
     }
 }
