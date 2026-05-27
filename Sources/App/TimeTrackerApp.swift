@@ -2,15 +2,19 @@ import SwiftUI
 
 @main
 struct TimeTrackerApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var vm = TimeTrackerViewModel()
 
     var body: some Scene {
-        WindowGroup {
+        Window("Time Tracker", id: AppWindowID.main) {
             MainView(vm: vm)
                 .timeTrackerWindowStyle()
                 .tint(Color.accentPurple)
         }
-        .defaultSize(width: 1060, height: 780)
+        .defaultSize(
+            width: AppWindowController.defaultSize.width,
+            height: AppWindowController.defaultSize.height
+        )
         .windowResizability(.contentMinSize)
         .windowToolbarStyle(.unified(showsTitle: false))
         .commands {
@@ -70,18 +74,17 @@ private struct WindowConfigurator: NSViewRepresentable {
         let view = NSView()
         DispatchQueue.main.async {
             guard let window = view.window else { return }
-            window.titlebarAppearsTransparent = true
-            window.titleVisibility = .hidden
-            window.backgroundColor = NSColor(Color.appChrome)
-            window.isMovableByWindowBackground = true
+            configure(window)
         }
         return view
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
         guard let window = nsView.window else { return }
-        window.titlebarAppearsTransparent = true
-        window.titleVisibility = .hidden
-        window.backgroundColor = NSColor(Color.appChrome)
+        configure(window)
+    }
+
+    private func configure(_ window: NSWindow) {
+        AppWindowController.configureMainWindow(window)
     }
 }

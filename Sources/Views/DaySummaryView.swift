@@ -35,20 +35,31 @@ struct DaySummaryView: View {
     }
 
     private var totalText: String {
-        vm.dayIsAllOff ? "Off Day" : HoursFormatter.duration(vm.dayTotalHours)
+        if vm.dayIsAllOff {
+            return HoursFormatter.duration(vm.dayOffCreditHours)
+        }
+        if vm.dayHasOffDay && vm.dayTotalHours == 0 {
+            return HoursFormatter.duration(vm.dayOffCreditHours)
+        }
+        return HoursFormatter.duration(vm.dayTotalHours)
     }
 
     private var totalColor: Color {
-        vm.dayIsAllOff ? .balanceNegative : .primary
+        if vm.dayIsAllOff || (vm.dayHasOffDay && vm.dayTotalHours == 0) {
+            return .balanceNegative
+        }
+        return .primary
     }
 
     private var balanceText: String {
-        if vm.dayIsAllOff || vm.selectedDayEntries.isEmpty { return "—" }
+        if vm.selectedDayEntries.isEmpty { return "—" }
+        if vm.dayIsAllOff && vm.dayTotalHours == 0 { return "—" }
         return HoursFormatter.signedBalance(vm.dayBalance)
     }
 
     private var balanceColor: Color {
-        if vm.dayIsAllOff || vm.selectedDayEntries.isEmpty { return .secondary }
+        if vm.selectedDayEntries.isEmpty { return .secondary }
+        if vm.dayIsAllOff && vm.dayTotalHours == 0 { return .secondary }
         return .balanceColor(for: vm.dayBalance)
     }
 
@@ -72,16 +83,20 @@ struct DaySummaryView: View {
     private var statusText: String {
         if vm.dayIsAllOff { return "Day Off" }
         if vm.selectedDayEntries.isEmpty { return "No entries" }
+        if vm.dayHasOffDay && vm.dayTotalHours == 0 { return "Day Off" }
         if vm.dayBalance > 0 { return "Overtime" }
         if vm.dayBalance == 0 { return "Target met" }
-        let remaining = vm.settings.dailyTargetHours - vm.dayTotalHours
+        let obligation = max(0, vm.settings.dailyTargetHours - vm.dayOffCreditHours)
+        let remaining = obligation - vm.dayTotalHours
         let h = Int(remaining)
         let m = Int((remaining - Double(h)) * 60)
         return "\(h)h \(m)m left"
     }
 
     private var statusColor: Color {
-        if vm.dayIsAllOff { return .balanceNegative }
+        if vm.dayIsAllOff || (vm.dayHasOffDay && vm.dayTotalHours == 0) {
+            return .balanceNegative
+        }
         if vm.selectedDayEntries.isEmpty { return .secondary }
         if vm.dayBalance >= 0 { return .balancePositive }
         return .warningOrange

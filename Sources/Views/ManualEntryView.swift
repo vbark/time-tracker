@@ -39,42 +39,18 @@ struct ManualEntryView: View {
                 Divider()
                     .padding(.horizontal, 16)
 
-                VStack(alignment: .leading, spacing: 14) {
-                    HStack(spacing: 16) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Start")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            TextField("09:00", text: $startTime)
-                                .textFieldStyle(.roundedBorder)
-                                .frame(width: 80)
-                                .monospacedDigit()
-                        }
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("End")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            TextField("17:00", text: $endTime)
-                                .textFieldStyle(.roundedBorder)
-                                .frame(width: 80)
-                                .monospacedDigit()
-                        }
-                        Spacer()
-                        Toggle("Off Day", isOn: $isOffDay)
-                            .toggleStyle(.checkbox)
-                            .font(.caption)
-                    }
+                VStack(alignment: .leading, spacing: 12) {
+                    timeAndOffDayRow
 
-                    TextField("Note (optional)", text: $note)
-                        .textFieldStyle(.roundedBorder)
+                    HStack(alignment: .center, spacing: 10) {
+                        TextField("Note (optional)", text: $note)
+                            .textFieldStyle(.roundedBorder)
 
-                    HStack {
-                        Spacer()
                         Button {
                             addEntry()
                         } label: {
                             Text("Add")
-                                .frame(width: 60)
+                                .frame(minWidth: 64)
                         }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.regular)
@@ -95,6 +71,37 @@ struct ManualEntryView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text("Please use HH:MM format (e.g. 09:00, 17:30)")
+        }
+    }
+
+    private var timeAndOffDayRow: some View {
+        HStack(alignment: .bottom, spacing: 12) {
+            timeField(label: "Start", text: $startTime, placeholder: "09:00")
+            timeField(label: "End", text: $endTime, placeholder: "17:00")
+
+            Toggle("Off Day", isOn: $isOffDay)
+                .toggleStyle(.checkbox)
+                .font(.caption)
+                .padding(.bottom, 4)
+
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color.secondaryCardBackground)
+        }
+    }
+
+    private func timeField(label: String, text: Binding<String>, placeholder: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            TextField(placeholder, text: text)
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 76)
+                .monospacedDigit()
         }
     }
 

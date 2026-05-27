@@ -124,11 +124,9 @@ private struct EntryRow: View {
 
             Spacer()
 
-            if !entry.isOffDay {
-                Text(entry.duration)
-                    .font(.system(.subheadline, design: .monospaced))
-                    .foregroundStyle(.secondary)
-            }
+            Text(Self.durationLabel(for: entry))
+                .font(.system(.subheadline, design: .monospaced))
+                .foregroundStyle(entry.isOffDay ? Color.balanceNegative.opacity(0.8) : .secondary)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 8)
@@ -138,6 +136,12 @@ private struct EntryRow: View {
                     .fill(Color.accentPurple.opacity(0.12))
             }
         }
+    }
+
+    private static func durationLabel(for entry: TimeEntry) -> String {
+        if entry.durationHours > 0 { return entry.duration }
+        let recomputed = TimeEntry.calculateDuration(start: entry.startTime, end: entry.endTime, isOffDay: false)
+        return recomputed == "00:00" ? entry.duration : recomputed
     }
 }
 
