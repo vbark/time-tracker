@@ -30,14 +30,18 @@ final class TimeTrackerViewModel {
 
     private(set) var selectedDayEntries: [TimeEntry] = []
     private(set) var dayTotalHours: Double = 0
+    private(set) var dayOffCreditHours: Double = 0
     private(set) var dayBalance: Double = 0
     private(set) var dayIsAllOff: Bool = false
+    private(set) var dayHasOffDay: Bool = false
 
     private(set) var weekHours: Double = 0
+    private(set) var weekExpectedHours: Double = 0
     private(set) var weekBalance: Double = 0
     private(set) var weekDays: Int = 0
 
     private(set) var monthHours: Double = 0
+    private(set) var monthExpectedHours: Double = 0
     private(set) var monthBalance: Double = 0
     private(set) var monthDays: Int = 0
     private(set) var monthWeekdays: Int = 0
@@ -46,6 +50,10 @@ final class TimeTrackerViewModel {
     private(set) var totalBalance: Double = 0
     private(set) var totalDays: Int = 0
     private(set) var averageDailyHours: Double = 0
+    private(set) var trackingWeekCount: Int = 0
+    private(set) var trackingMonthCount: Int = 0
+    private(set) var averageWeeklyHours: Double = 0
+    private(set) var averageMonthlyHours: Double = 0
 
     private(set) var datesWithWork: Set<String> = []
     private(set) var datesWithOffOnly: Set<String> = []
@@ -252,14 +260,45 @@ final class TimeTrackerViewModel {
     private func dailyHours(for dateStr: String) -> Double {
         entries
             .filter { $0.dateString == dateStr && !$0.isOffDay }
-            .reduce(0) { $0 + $1.durationHours }
+            .reduce(0) { $0 + $1.effectiveDurationHours }
+    }
+
+    private func offDayCreditHours(for dateStr: String) -> Double {
+        entries
+            .filter { $0.dateString == dateStr && $0.isOffDay }
+            .reduce(0) { $0 + $1.effectiveDurationHours }
+    }
+
+    /// Expected work for a logged day; off-day credit reduces obligation (min 0).
+    private func dailyExpectedHours(for dateStr: String) -> Double {
+        let dayEntries = entries.filter { $0.dateString == dateStr }
+        guard !dayEntries.isEmpty else { return 0 }
+
+        if dayEntries.contains(where: \.isOffDay) {
+            return max(0, settings.dailyTargetHours - offDayCreditHours(for: dateStr))
+        }
+
+        return settings.dailyTargetHours
+    }
+
+    private func expectedHours(in dates: Set<String>) -> Double {
+        dates.reduce(0) { $0 + dailyExpectedHours(for: $1) }
     }
 
     private func dailyBalance(for dateStr: String) -> Double {
         let dayEntries = entries.filter { $0.dateString == dateStr }
         guard !dayEntries.isEmpty else { return 0 }
-        if dayEntries.allSatisfy(\.isOffDay) { return 0 }
-        return dailyHours(for: dateStr) - settings.dailyTargetHours
+
+        let workHours = dailyHours(for: dateStr)
+        let offCredit = offDayCreditHours(for: dateStr)
+        let hasOffDay = dayEntries.contains(where: \.isOffDay)
+
+        if hasOffDay {
+            let obligation = max(0, settings.dailyTargetHours - offCredit)
+            return max(0, workHours - obligation)
+        }
+
+        return workHours - settings.dailyTargetHours
     }
 
     private func datesInRange(from start: Date, to end: Date) -> Set<String> {
@@ -289,8 +328,10 @@ final class TimeTrackerViewModel {
 
         selectedDayEntries = entries.filter { $0.dateString == dateStr }
         dayTotalHours = dailyHours(for: dateStr)
+        dayOffCreditHours = offDayCreditHours(for: dateStr)
         dayBalance = dailyBalance(for: dateStr)
         dayIsAllOff = !selectedDayEntries.isEmpty && selectedDayEntries.allSatisfy(\.isOffDay)
+        dayHasOffDay = selectedDayEntries.contains(where: \.isOffDay)
 
         let weekday = cal.component(.weekday, from: selectedDate)
         let daysFromMonday = (weekday + 5) % 7
@@ -298,6 +339,7 @@ final class TimeTrackerViewModel {
         let sunday = cal.date(byAdding: .day, value: 6, to: monday)!
         let weekDates = datesInRange(from: monday, to: sunday)
         weekHours = weekDates.reduce(0) { $0 + dailyHours(for: $1) }
+        weekExpectedHours = expectedHours(in: weekDates)
         weekBalance = weekDates.reduce(0) { $0 + dailyBalance(for: $1) }
         weekDays = workedDays(in: weekDates)
 
@@ -308,6 +350,7 @@ final class TimeTrackerViewModel {
         let lastOfMonth = cal.date(from: DateComponents(year: year, month: month, day: lastDay))!
         let monthDates = datesInRange(from: firstOfMonth, to: lastOfMonth)
         monthHours = monthDates.reduce(0) { $0 + dailyHours(for: $1) }
+        monthExpectedHours = expectedHours(in: monthDates)
         monthBalance = monthDates.reduce(0) { $0 + dailyBalance(for: $1) }
         self.monthDays = workedDays(in: monthDates)
         monthWeekdays = weekdaysInMonth(year: year, month: month)
@@ -317,6 +360,24 @@ final class TimeTrackerViewModel {
         totalBalance = allDates.reduce(0) { $0 + dailyBalance(for: $1) }
         totalDays = workedDays(in: allDates)
         averageDailyHours = totalDays > 0 ? totalHours / Double(totalDays) : 0
+
+        var weekKeys = Set<String>()
+        var monthKeys = Set<String>()
+        for loggedDate in allDates {
+            guard let date = DateFormatter.isoDate.date(from: loggedDate) else { continue }
+            let weekday = cal.component(.weekday, from: date)
+            let daysFromMonday = (weekday + 5) % 7
+            let monday = cal.date(byAdding: .day, value: -daysFromMonday, to: date)!
+            weekKeys.insert(DateFormatter.isoDate.string(from: monday))
+
+            let year = cal.component(.year, from: date)
+            let month = cal.component(.month, from: date)
+            monthKeys.insert(String(format: "%04d-%02d", year, month))
+        }
+        trackingWeekCount = weekKeys.count
+        trackingMonthCount = monthKeys.count
+        averageWeeklyHours = trackingWeekCount > 0 ? totalHours / Double(trackingWeekCount) : 0
+        averageMonthlyHours = trackingMonthCount > 0 ? totalHours / Double(trackingMonthCount) : 0
 
         var work = Set<String>()
         var offOnly = Set<String>()

@@ -34,10 +34,8 @@ struct TimeEntry: Identifiable, Codable, Equatable, Hashable {
 
     // MARK: - Duration Calculation
 
-    /// Compute "HH:mm" duration from start/end time strings. Off days always return "00:00".
+    /// Compute "HH:mm" duration from start/end time strings.
     static func calculateDuration(start: String, end: String, isOffDay: Bool) -> String {
-        if isOffDay { return "00:00" }
-
         let formatter = DateFormatter.hourMinute
         guard let startDate = formatter.date(from: start),
               var endDate = formatter.date(from: end) else {
@@ -57,6 +55,17 @@ struct TimeEntry: Identifiable, Codable, Equatable, Hashable {
 
     /// Duration in decimal hours (e.g. "07:30" -> 7.5)
     var durationHours: Double {
+        Self.hours(from: duration)
+    }
+
+    /// Stored duration, or start/end when legacy rows still have "00:00".
+    var effectiveDurationHours: Double {
+        let stored = durationHours
+        if stored > 0 { return stored }
+        return Self.hours(from: Self.calculateDuration(start: startTime, end: endTime, isOffDay: false))
+    }
+
+    private static func hours(from duration: String) -> Double {
         let parts = duration.split(separator: ":")
         guard parts.count == 2,
               let h = Double(parts[0]),

@@ -7,18 +7,13 @@ struct CalendarCardView: View {
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             monthNavigation
             weekdayHeaders
             calendarGrid
         }
-        .padding(16)
-        .background {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color.cardBackground)
-                .stroke(Color.cardBorder.opacity(0.7), lineWidth: 1)
-                .shadow(color: .black.opacity(0.10), radius: 14, y: 6)
-        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
     }
 
     private var monthNavigation: some View {
