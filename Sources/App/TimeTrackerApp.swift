@@ -8,7 +8,7 @@ struct TimeTrackerApp: App {
     var body: some Scene {
         Window("Time Tracker", id: AppWindowID.main) {
             MainView(vm: vm)
-                .timeTrackerWindowStyle()
+                .timeTrackerWindowStyle(applyDefaultSize: true)
                 .tint(Color.accentPurple)
         }
         .defaultSize(
@@ -35,7 +35,7 @@ struct TimeTrackerApp: App {
 
         Settings {
             StorageSettingsView(vm: vm)
-                .timeTrackerWindowStyle()
+                .timeTrackerWindowStyle(applyDefaultSize: false)
                 .tint(Color.accentPurple)
         }
     }
@@ -64,27 +64,48 @@ struct TimeTrackerApp: App {
 }
 
 private extension View {
-    func timeTrackerWindowStyle() -> some View {
-        background(WindowConfigurator())
+    func timeTrackerWindowStyle(applyDefaultSize: Bool) -> some View {
+        background(WindowConfigurator(applyDefaultSize: applyDefaultSize))
     }
 }
 
+/// Applies window chrome without driving a SwiftUI layout loop.
+/// Default size is applied once in `viewDidMoveToWindow`, never from a
+/// repeating `updateNSView` → `setContentSize` cycle.
 private struct WindowConfigurator: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        DispatchQueue.main.async {
-            guard let window = view.window else { return }
-            configure(window)
-        }
+    var applyDefaultSize: Bool
+
+    func makeNSView(context: Context) -> WindowConfigNSView {
+        let view = WindowConfigNSView()
+        view.applyDefaultSize = applyDefaultSize
         return view
     }
 
-    func updateNSView(_ nsView: NSView, context: Context) {
-        guard let window = nsView.window else { return }
-        configure(window)
+    func updateNSView(_ nsView: WindowConfigNSView, context: Context) {
+        nsView.applyDefaultSize = applyDefaultSize
+        nsView.applyChromeIfPossible()
+    }
+}
+
+private final class WindowConfigNSView: NSView {
+    var applyDefaultSize = false
+    private var didApplyDefaultSize = false
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        applyChromeIfPossible()
+        applyDefaultSizeIfNeeded()
     }
 
-    private func configure(_ window: NSWindow) {
-        AppWindowController.configureMainWindow(window)
+    func applyChromeIfPossible() {
+        guard let window else { return }
+        AppWindowController.configureWindowChrome(window)
+        applyDefaultSizeIfNeeded()
+    }
+
+    private func applyDefaultSizeIfNeeded() {
+        guard applyDefaultSize, !didApplyDefaultSize, let window else { return }
+        AppWindowController.applyDefaultFrameIfNeeded(to: window)
+        didApplyDefaultSize = true
     }
 }

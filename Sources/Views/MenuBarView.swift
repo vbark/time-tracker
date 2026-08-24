@@ -56,6 +56,7 @@ struct MenuBarView: View {
                 .padding(.vertical, 10)
         }
         .frame(width: 260)
+        .fixedSize(horizontal: false, vertical: true)
         .background(Color.appBackground)
         .background(MainWindowOpenHandler(openWindow: openWindow))
     }

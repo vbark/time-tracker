@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import TimeTrackerWindowing
 
 extension Notification.Name {
     static let requestOpenMainWindow = Notification.Name("TimeTracker.requestOpenMainWindow")
@@ -43,28 +44,38 @@ enum AppWindowController {
         return window.canBecomeKey
     }
 
-    static func configureMainWindow(_ window: NSWindow) {
+    static func configureWindowChrome(_ window: NSWindow) {
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
         window.backgroundColor = NSColor(Color.appChrome)
         window.isMovableByWindowBackground = true
         window.isReleasedWhenClosed = false
+    }
+
+    static func configureMainWindow(_ window: NSWindow) {
+        configureWindowChrome(window)
         applyDefaultFrameIfNeeded(to: window)
     }
 
+    /// Launch size only. Must not run from SwiftUI `updateNSView` on every pass.
     static func applyDefaultFrameIfNeeded(to window: NSWindow) {
-        let size = defaultSize
-        let current = window.contentLayoutRect.size
+        let id = ObjectIdentifier(window)
+        guard !windowsWithAppliedDefaultFrame.contains(id) else { return }
 
-        if current.width < size.width - 20 || current.height < size.height - 20 {
-            window.setContentSize(size)
-            window.center()
+        var policy = OnceWindowFramePolicy(
+            policy: WindowFramePolicy(
+                defaultSize: CGSize(width: defaultSize.width, height: defaultSize.height)
+            )
+        )
+        guard let size = policy.proposedContentSize(forContentLayoutSize: window.contentLayoutRect.size) else {
+            windowsWithAppliedDefaultFrame.insert(id)
             return
         }
 
-        if current.height > size.height + 40 {
-            window.setContentSize(NSSize(width: max(current.width, size.width), height: size.height))
-            window.center()
-        }
+        window.setContentSize(NSSize(width: size.width, height: size.height))
+        window.center()
+        windowsWithAppliedDefaultFrame.insert(id)
     }
+
+    private static var windowsWithAppliedDefaultFrame = Set<ObjectIdentifier>()
 }
